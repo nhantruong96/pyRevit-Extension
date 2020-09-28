@@ -1,0 +1,15 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "task-New_App_UI",
+      "appliesTo": "Portcoast.extension/Portcoast.tab/Developing.panel/New App.pushbutton/New_App_UI.xaml",
+      "type": "launch"
+    },
+    {
+      "taskLabel": "task-New_App_UI",
+      "appliesTo": "Portcoast.extension/Portcoast.tab/Developing.panel/New App.pushbutton/New_App_UI.xaml",
+      "type": "launch"
+    }
+  ]
+}

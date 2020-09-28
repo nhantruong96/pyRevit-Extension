@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Portcoast.extension",
+    "\\Portcoast.extension\\Portcoast.tab",
+    "\\Portcoast.extension\\Portcoast.tab\\Developing.panel",
+    "\\Portcoast.extension\\Portcoast.tab\\Developing.panel\\New App.pushbutton",
+    "\\Portcoast.extension\\Portcoast.tab\\View.panel",
+    "\\Portcoast.extension\\Portcoast.tab\\View.panel\\View Filter.pulldown",
+    "\\Portcoast.extension\\Portcoast.tab\\View.panel\\View Filter.pulldown\\Tranfer View Filters.pushbutton"
+  ],
+  "SelectedNode": "\\Portcoast.extension\\Portcoast.tab\\Developing.panel\\New App.pushbutton\\New_App_UI.xaml",
+  "PreviewInSolutionExplorer": false
+}
