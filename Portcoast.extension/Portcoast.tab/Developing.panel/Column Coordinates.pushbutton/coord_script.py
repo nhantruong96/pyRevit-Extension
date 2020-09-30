@@ -14,13 +14,6 @@ try:
     uidoc = __revit__.ActiveUIDocument
     doc = uidoc.Document
     app = __revit__.Application
-
-    # Define Function
-    
-    def feet_to_mm(x):
-        """
-        Convert feet to milimeters"""
-        return x*304.8
     
     # Get All Selected ElementIDs
     selected_ElementIDs = uidoc.Selection.GetElementIds()
@@ -73,11 +66,10 @@ try:
  
     y_defi_options = ExternalDefinitionCreationOptions("Y", ParameterType.Length)
     y_defi_options.UserModifiable = False
-            
-#    x_defi = Definitions()
-#    x_defi.Create(x_defi_options)
+    
     DefinitionFile = os.getcwd() + "\SharedParameterFile.txt"
     definition_File = app.OpenSharedParameterFile()
+
     groups = definition_File.Groups
     definitions = map(lambda x: x.Definitions, groups)
     
@@ -98,6 +90,8 @@ try:
     x_param_list = map(lambda e: e.LookupParameter("X"), piles_list)
     y_param_list = map(lambda e: e.LookupParameter("Y"), piles_list)
     
+    print(x_param_list)
+    print(y_param_list)
     trans = Transaction(doc, "Set X Value")
     trans.Start()
     for px, py, x, y in zip(x_param_list, y_param_list, x_list, y_list):
@@ -105,7 +99,5 @@ try:
         py.Set(y)
     trans.Commit()
         
-    
-    
 except Exception as error:
     TaskDialog.Show("Error",str(error))
