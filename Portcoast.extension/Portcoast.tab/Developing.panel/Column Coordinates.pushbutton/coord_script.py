@@ -90,8 +90,6 @@ try:
     x_param_list = map(lambda e: e.LookupParameter("X"), piles_list)
     y_param_list = map(lambda e: e.LookupParameter("Y"), piles_list)
     
-    print(x_param_list)
-    print(y_param_list)
     trans = Transaction(doc, "Set X Value")
     trans.Start()
     for px, py, x, y in zip(x_param_list, y_param_list, x_list, y_list):
