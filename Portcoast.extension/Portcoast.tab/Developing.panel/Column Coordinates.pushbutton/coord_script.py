@@ -1,4 +1,5 @@
 try:
+    import os
     import math
     import clr
     clr.AddReference('RevitAPI')
@@ -53,16 +54,58 @@ try:
 
     # Get Lengths
     lengths = map(lambda x: x.GetLength(), points_list)
-    print(lengths)
-    
-#            x = feet_to_mm(i.Location.Point.X)
-#            y = feet_to_mm(i.Location.Point.Y)
-#            
-#            angle = i.Location.Point.AngleTo(Ox)*180/math.pi
-#            
-#            
-#            length = feet_to_mm(i.Location.Point.GetLength())
-#            print(i, "{}, {}, {}, {}".format(x, y, length, angle))
 
+    # New Angles List
+    new_angles_list = map(lambda a1 : a1 - a0 +(a0//math.pi)*2*math.pi, angle_list)
+
+    # New Coords
+    x_list = []
+    y_list = []
+    for i in range(len(points_list)):
+        x = (lengths[i] * math.cos(new_angles_list[i]) + x0)
+        y = (lengths[i] * math.sin(new_angles_list[i]) + y0)
+        x_list.append(x)
+        y_list.append(y)
+    # New Definitions
+ 
+    x_defi_options = ExternalDefinitionCreationOptions("X", ParameterType.Length)
+    x_defi_options.UserModifiable = False
+ 
+    y_defi_options = ExternalDefinitionCreationOptions("Y", ParameterType.Length)
+    y_defi_options.UserModifiable = False
+            
+#    x_defi = Definitions()
+#    x_defi.Create(x_defi_options)
+    DefinitionFile = os.getcwd() + "\SharedParameterFile.txt"
+    definition_File = app.OpenSharedParameterFile()
+    groups = definition_File.Groups
+    definitions = map(lambda x: x.Definitions, groups)
+    
+    # Create Category Set and Insert Category of Structural Columns to it
+    categories = app.Create.NewCategorySet()
+    category = doc.Settings.Categories.get_Item(BuiltInCategory.OST_StructuralColumns)
+    categories.Insert(category)
+    instanceBinding = app.Create.NewInstanceBinding(categories)
+    bindingMap = doc.ParameterBindings
+    
+    trans = Transaction(doc, "Binding Parameters to Categories")
+    trans.Start()
+    for defis in definitions:
+        for d in defis:
+            bindingMap.Insert(d,instanceBinding, BuiltInParameterGroup.PG_DATA)
+    trans.Commit()
+    
+    x_param_list = map(lambda e: e.LookupParameter("X"), piles_list)
+    y_param_list = map(lambda e: e.LookupParameter("Y"), piles_list)
+    
+    trans = Transaction(doc, "Set X Value")
+    trans.Start()
+    for px, py, x, y in zip(x_param_list, y_param_list, x_list, y_list):
+        px.Set(x)
+        py.Set(y)
+    trans.Commit()
+        
+    
+    
 except Exception as error:
     TaskDialog.Show("Error",str(error))
