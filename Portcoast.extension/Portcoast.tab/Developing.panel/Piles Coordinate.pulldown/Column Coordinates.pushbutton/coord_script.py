@@ -46,6 +46,7 @@ try:
     shared_base_point = FilteredElementCollector(doc).OfCategory(OST_SharedBasePoint).ToElements()[0]
     y0 = shared_base_point.GetParameters("N/S")[0].AsDouble()
     x0 = shared_base_point.GetParameters("E/W")[0].AsDouble()
+    print(shared_base_point.Location)
     
     # Get Lengths
     lengths = map(lambda x: x.GetLength(), points_list)
@@ -96,9 +97,9 @@ try:
     trans.Start()
     for px, py, x, y in zip(x_param_list, y_param_list, x_list, y_list):
         pxOk = px.Set(x)
-        py.Set(y)
-        print(pxOk)
+        pxOk = py.Set(y)
+
     trans.Commit()
-        
+    print(x_list, y_list)
 except Exception as error:
     TaskDialog.Show("Error",str(error))
