@@ -1,3 +1,5 @@
+__title__ = "Add Coordinate Values"
+
 try:
     import os
     import math
@@ -15,10 +17,7 @@ try:
     doc = uidoc.Document
     app = __revit__.Application
     
-    # Get All Selected ElementIDs
     selected_ElementIDs = uidoc.Selection.GetElementIds()
-    
-    # Get All Selected Elements
     selected_Elements = map(lambda x: doc.GetElement(x), selected_ElementIDs)
     
     # Filter to get Structural Columns
@@ -26,6 +25,7 @@ try:
     points_list = []
     angle_list = []
     for i in piles_list:
+        location = i.Location
         location_point = i.Location.Point
         
         # Points List
@@ -41,10 +41,12 @@ try:
     
     # Get Project Base Point
     project_base_point = FilteredElementCollector(doc).OfCategory(OST_ProjectBasePoint).ToElements()[0]
-    y0 = project_base_point.GetParameters("N/S")[0].AsDouble()
-    x0 = project_base_point.GetParameters("E/W")[0].AsDouble()
     a0 = project_base_point.GetParameters("Angle to True North")[0].AsDouble()
-
+    
+    shared_base_point = FilteredElementCollector(doc).OfCategory(OST_SharedBasePoint).ToElements()[0]
+    y0 = shared_base_point.GetParameters("N/S")[0].AsDouble()
+    x0 = shared_base_point.GetParameters("E/W")[0].AsDouble()
+    
     # Get Lengths
     lengths = map(lambda x: x.GetLength(), points_list)
 
@@ -93,8 +95,9 @@ try:
     trans = Transaction(doc, "Set X Value")
     trans.Start()
     for px, py, x, y in zip(x_param_list, y_param_list, x_list, y_list):
-        px.Set(x)
+        pxOk = px.Set(x)
         py.Set(y)
+        print(pxOk)
     trans.Commit()
         
 except Exception as error:
