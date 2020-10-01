@@ -24,6 +24,8 @@ try:
     piles_list = list(filter(lambda x: x.Category.Name == "Structural Columns", selected_Elements))
     points_list = []
     angle_list = []
+    x_pile_local_list = []
+    y_pile_local_list = []
     for i in piles_list:
         location = i.Location
         location_point = i.Location.Point
@@ -33,6 +35,9 @@ try:
         
         # Angles List
         y = location_point.Y
+        y_pile_local_list.append(y)
+        x = location_point.X
+        x = x_pile_local_list.append(x)
         angle = i.Location.Point.AngleTo(XYZ(1,0,0))
         if y>0:
             angle_list.append(angle)
@@ -41,12 +46,14 @@ try:
     
     # Get Project Base Point
     project_base_point = FilteredElementCollector(doc).OfCategory(OST_ProjectBasePoint).ToElements()[0]
-    a0 = project_base_point.GetParameters("Angle to True North")[0].AsDouble()
+    a0 = -1*project_base_point.GetParameters("Angle to True North")[0].AsDouble()
     
     shared_base_point = FilteredElementCollector(doc).OfCategory(OST_SharedBasePoint).ToElements()[0]
     y_survey_global = shared_base_point.GetParameters("N/S")[0].AsDouble()
     x_survey_global = shared_base_point.GetParameters("E/W")[0].AsDouble()
-    survey_vec_negate = shared_base_point.Position.Negate()
+    vec_survey_global = XYZ(x_survey_global, y_survey_global, 0)
+    survey_vec = shared_base_point.Position
+    survey_vec_negate = survey_vec.Negate()
     y_survey_local_negate = survey_vec_negate.Y
     x_survey_local_negate = survey_vec_negate.X
     
@@ -60,8 +67,8 @@ try:
     x_list = []
     y_list = []
     for i in range(len(points_list)):
-        x = lengths[i] * math.cos(new_angles_list[i]) + (x_survey_local_negate + x_survey_global)
-        y = lengths[i] * math.sin(new_angles_list[i]) + (y_survey_local_negate + y_survey_global)
+        x = x_pile_local_list[i] + (x_survey_local_negate + x_survey_global)
+        y = y_pile_local_list[i] + (y_survey_local_negate + y_survey_global)
         x_list.append(x)
         y_list.append(y)
         
@@ -74,5 +81,13 @@ try:
         pxOk = px.Set(x)
         pxOk = py.Set(y)
     trans.Commit()
+    
+    location_pile_local = []
+    for i in piles_list:
+        
+        vec_survey_to_pile = i.Location.Point.Add(survey_vec_negate)
+        rotated_vec_survey_to_pile = XYZ(vec_survey_to_pile.X * math.cos(a0)-vec_survey_to_pile.Y * math.sin(a0), vec_survey_to_pile.X * math.sin(a0) + vec_survey_to_pile.Y * math.cos(a0), 0)
+        vec = rotated_vec_survey_to_pile.Add(vec_survey_global)
+        print(vec.Multiply(304.8))
 except Exception as error:
     TaskDialog.Show("Error",str(error))
