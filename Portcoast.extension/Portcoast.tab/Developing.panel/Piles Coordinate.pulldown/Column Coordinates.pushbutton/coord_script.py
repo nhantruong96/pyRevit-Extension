@@ -44,9 +44,11 @@ try:
     a0 = project_base_point.GetParameters("Angle to True North")[0].AsDouble()
     
     shared_base_point = FilteredElementCollector(doc).OfCategory(OST_SharedBasePoint).ToElements()[0]
-    y0 = shared_base_point.GetParameters("N/S")[0].AsDouble()
-    x0 = shared_base_point.GetParameters("E/W")[0].AsDouble()
-    print(shared_base_point.Location)
+    y_survey_global = shared_base_point.GetParameters("N/S")[0].AsDouble()
+    x_survey_global = shared_base_point.GetParameters("E/W")[0].AsDouble()
+    survey_vec_negate = shared_base_point.Position.Negate()
+    y_survey_local_negate = survey_vec_negate.Y
+    x_survey_local_negate = survey_vec_negate.X
     
     # Get Lengths
     lengths = map(lambda x: x.GetLength(), points_list)
@@ -58,38 +60,11 @@ try:
     x_list = []
     y_list = []
     for i in range(len(points_list)):
-        x = (lengths[i] * math.cos(new_angles_list[i]) + x0)
-        y = (lengths[i] * math.sin(new_angles_list[i]) + y0)
+        x = lengths[i] * math.cos(new_angles_list[i]) + (x_survey_local_negate + x_survey_global)
+        y = lengths[i] * math.sin(new_angles_list[i]) + (y_survey_local_negate + y_survey_global)
         x_list.append(x)
         y_list.append(y)
-    # New Definitions
- 
-    x_defi_options = ExternalDefinitionCreationOptions("X", ParameterType.Length)
-    x_defi_options.UserModifiable = False
- 
-    y_defi_options = ExternalDefinitionCreationOptions("Y", ParameterType.Length)
-    y_defi_options.UserModifiable = False
-    
-    DefinitionFile = os.getcwd() + "\SharedParameterFile.txt"
-    definition_File = app.OpenSharedParameterFile()
-
-    groups = definition_File.Groups
-    definitions = map(lambda x: x.Definitions, groups)
-    
-    # Create Category Set and Insert Category of Structural Columns to it
-    categories = app.Create.NewCategorySet()
-    category = doc.Settings.Categories.get_Item(BuiltInCategory.OST_StructuralColumns)
-    categories.Insert(category)
-    instanceBinding = app.Create.NewInstanceBinding(categories)
-    bindingMap = doc.ParameterBindings
-    
-    trans = Transaction(doc, "Binding Parameters to Categories")
-    trans.Start()
-    for defis in definitions:
-        for d in defis:
-            bindingMap.Insert(d,instanceBinding, BuiltInParameterGroup.PG_DATA)
-    trans.Commit()
-    
+        
     x_param_list = map(lambda e: e.LookupParameter("X"), piles_list)
     y_param_list = map(lambda e: e.LookupParameter("Y"), piles_list)
     
@@ -98,8 +73,6 @@ try:
     for px, py, x, y in zip(x_param_list, y_param_list, x_list, y_list):
         pxOk = px.Set(x)
         pxOk = py.Set(y)
-
     trans.Commit()
-    print(x_list, y_list)
 except Exception as error:
     TaskDialog.Show("Error",str(error))
