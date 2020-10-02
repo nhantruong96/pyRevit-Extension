@@ -1,6 +1,7 @@
 __title__ = "Add Coordinate Values"
 
 try:
+    import System
     import os
     import math
     import clr
@@ -45,8 +46,7 @@ try:
             top_level = i.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_PARAM).AsDouble() + i.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM).AsDouble()
             point = location.Point
             vec_pile_local.append(location.Point.Add(XYZ(0,0,top_level)))
-    print(map(lambda x: x.Multiply(304.8), vec_pile_local))
-        
+
     vec_pile_global = []
     for i in vec_pile_local:
         vec_StoP = i.Add(survey_vec_negate)
@@ -55,9 +55,13 @@ try:
         rotated_vec_StoP = XYZ(x_StoP * math.cos(a0) - y_StoP * math.sin(a0), x_StoP * math.sin(a0) + y_StoP * math.cos(a0), 0)
         vec = rotated_vec_StoP.Add(vec_survey_global)
         vec_pile_global.append(vec)    
-        
-    x_param_list = map(lambda e: e.LookupParameter("X"), piles_list)
-    y_param_list = map(lambda e: e.LookupParameter("Y"), piles_list)
+    
+    x_guid = System.Guid("b864344b-a63a-4521-be59-8948b2fcb440")
+    y_guid = System.Guid("73e0567a-dce6-45f4-9240-2bb164a59fab")
+    
+    
+    x_param_list = map(lambda e: e.get_Parameter(x_guid), piles_list)
+    y_param_list = map(lambda e: e.get_Parameter(y_guid), piles_list)
     
     trans = Transaction(doc, "Set X Value")
     trans.Start()
@@ -66,10 +70,6 @@ try:
     for px, py, vec in zip(x_param_list, y_param_list, vec_pile_global):
         pxOk = px.Set(vec.X)
         pyOk = py.Set(vec.Y)
-        
-        print(pxOk)
-        print(pyOk)
-        
         if not pxOk:
             px_error_list.append(px)
         if not pyOk:
