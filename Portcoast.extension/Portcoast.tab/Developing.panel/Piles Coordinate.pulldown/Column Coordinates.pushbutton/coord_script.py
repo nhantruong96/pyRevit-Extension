@@ -33,9 +33,23 @@ try:
     survey_vec_negate = shared_base_point.Position.Negate()
 
     # New Coords
-    vec_pile_global = []
+    vec_pile_local = []
     for i in piles_list:
-        vec_StoP = i.Location.Point.Add(survey_vec_negate)
+        location = i.Location
+        if type(location) == LocationCurve:
+            if location.Curve.Direction.Z > 0:
+                vec_pile_local.append(location.Curve.GetEndPoint(1))
+            if location.Curve.Direction.Z < 0:
+                vec_pile_local.append(location.Curve.GetEndPoint(0))
+        elif type(location) == LocationPoint:
+            top_level = i.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_PARAM).AsDouble() + i.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM).AsDouble()
+            point = location.Point
+            vec_pile_local.append(location.Point.Add(XYZ(0,0,top_level)))
+    print(map(lambda x: x.Multiply(304.8), vec_pile_local))
+        
+    vec_pile_global = []
+    for i in vec_pile_local:
+        vec_StoP = i.Add(survey_vec_negate)
         x_StoP = vec_StoP.X
         y_StoP = vec_StoP.Y
         rotated_vec_StoP = XYZ(x_StoP * math.cos(a0) - y_StoP * math.sin(a0), x_StoP * math.sin(a0) + y_StoP * math.cos(a0), 0)
@@ -52,6 +66,10 @@ try:
     for px, py, vec in zip(x_param_list, y_param_list, vec_pile_global):
         pxOk = px.Set(vec.X)
         pyOk = py.Set(vec.Y)
+        
+        print(pxOk)
+        print(pyOk)
+        
         if not pxOk:
             px_error_list.append(px)
         if not pyOk:
