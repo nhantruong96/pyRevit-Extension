@@ -47,17 +47,17 @@ try:
     
     trans = Transaction(doc, "Set X Value")
     trans.Start()
-    pxOk_list = []
-    pyOk_list = []
+    px_error_list = []
+    py_error_list = []
     for px, py, vec in zip(x_param_list, y_param_list, vec_pile_global):
         pxOk = px.Set(vec.X)
         pyOk = py.Set(vec.Y)
-        pxOk_list.append(pxOk)
-        pyOk_list.append(pyOk)
-        if not pxOk or not pxOk:
-            print(px, py)
+        if not pxOk:
+            px_error_list.append(px)
+        if not pyOk:
+            py_error_list.append(py)
     trans.Commit()
-    if not pxOk_list or not pyOk_list:
+    if not px_error_list or not py_error_list:
         TaskDialog.Show("Succeed","Mission's completed!")
 except Exception as error:
     TaskDialog.Show("Error",str(error))
