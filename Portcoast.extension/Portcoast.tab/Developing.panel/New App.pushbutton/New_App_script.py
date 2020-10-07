@@ -1,3 +1,6 @@
+__title__ = "Develop Credit"
+
+
 import wpf
 
 from System import Uri, UriKind
