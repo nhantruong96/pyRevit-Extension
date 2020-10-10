@@ -19,4 +19,3 @@ framingList = []
 for i in filterCollector:
     if not i.IsHidden(doc.ActiveView):
         framingList.append(i)
-        print(i)
